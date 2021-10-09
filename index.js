@@ -1,70 +1,87 @@
-// TODO: Include packages needed for this application
-var inquirer = require('inquirer');
-// var writeToFile = require('writeToFile');
-inquirer
-  .prompt([
-      {
-          type: 'input',
-          name: 'name',
-          message: "What is the title of your project?"
-      }, 
-      {
+// Declaring the dependencies and variables
+const fs = require("fs");
+const util = require("util");
+const inquirer = require("inquirer");
+const generateReadme = require("./utils/generateReadme")
+const writeFileAsync = util.promisify(fs.writeFile);
 
-      type: 'input',
-      name: 'technologies',
-      message: "What technologies did you use?",
-      },
-      { 
-
-      type: 'input',
-      name: 'installation',
-      message:"How can your project be insalled?"
-     },
-     {  
-
-     type: 'input',
-     name: 'use',
-     message:"How can your project be used?"
-     }])
-
-  .then((answers) => {
-      console.log(answers.name)
-      console.log(answers.technologies)
-      console.log(answers.installation)
-      console.log(answers.use)
-      console.log("Here is the info")
-
-
-      fs.writeFile(createFile, JSON.stringify(data, null, '\t'), function(err) {
-
-        if (err) {
-          return console.log(err);
+//Prompt the user questions to populate the README.md
+function promptUser(){
+    return inquirer.prompt([
+        {
+            type: "input",
+            name: "projectTitle",
+            message: "What is the project title?",
+        },
+        {
+            type: "input",
+            name: "description",
+            message: "Write a brief description of your project: "
+        },
+        {
+            type: "input",
+            name: "installation",
+            message: "Describe the installation process if any: ",
+        },
+        {
+            type: "input",
+            name: "usage",
+            message: "What is this project usage for?"
+        },
+        {
+            type: "list",
+            name: "license",
+            message: "Chose the appropriate license for this project: ",
+            choices: [
+                "Apache",
+                "Academic",
+                "GNU",
+                "ISC",
+                "MIT",
+                "Mozilla",
+                "Open"
+            ]
+        },
+        {
+            type: "input",
+            name: "contributing",
+            message: "Who are the contributors of this projects?"
+        },
+        {
+            type: "input",
+            name: "tests",
+            message: "Is there a test included?"
+        },
+        {
+            type: "input",
+            name: "questions",
+            message: "What do I do if I have an issue? "
+        },
+        {
+            type: "input",
+            name: "username",
+            message: "Please enter your GitHub username: "
+        },
+        {
+            type: "input",
+            name: "email",
+            message: "Please enter your email: "
         }
-    
-        console.log("Success!");
-    
-      });
-  })
-  .catch((error) => {
-    if (error.isTtyError) {
-      // Prompt couldn't be rendered in the current environment
-    } else {
-      // Something else went wrong
+    ]);
+} 
+
+// Async function using util.promisify 
+  async function init() {
+    try {
+        // Ask user questions and generate responses
+        const answers = await promptUser();
+        const generateContent = generateReadme(answers);
+        // Write new README.md to dist directory
+        await writeFileAsync('./dist/README.md', generateContent);
+        console.log('✔️  Successfully wrote to README.md');
+    }   catch(err) {
+        console.log(err);
     }
-  });
-
+  }
   
-// TODO: Create a function to write README file
-//function writeToFile(fileName, data) {}
-// 
-// const fs = require('fs');
-
-// fs.writeFile('Readme.md', answers, (error, data) => {
-//   if (error) throw error;
-//   console.log('Success')
-// }
-// // TODO: Create a function to initialize app
-function init() {}
-
-// Function call to initialize app
-init();
+  init();  
